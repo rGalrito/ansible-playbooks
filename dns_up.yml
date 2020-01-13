@@ -7,10 +7,10 @@
   tasks:
 #  - name: ping DNS server
 #    ping: 
-  - name: ECHOING
-    shell: >
-      echo  {{ http.port }}
-    register: echo
+#  - name: ECHOING
+#    shell: >
+#      echo  {{ http.port }}
+#    register: echo
 
   - name: DNS admin page check
     uri:
