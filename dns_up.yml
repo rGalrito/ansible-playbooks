@@ -1,0 +1,74 @@
+- name: 
+  hosts: dns
+  #any_errors_fatal: true
+  any_errors_fatal: false
+  serial: 1
+  become: false
+  tasks:
+#  - name: ping DNS server
+#    ping: 
+  - name: ECHOING
+    shell: >
+      echo  {{ http.port }}
+    register: echo
+
+  - name: DNS admin page check
+    uri:
+      url: "{{ dns.admin_url }}"
+      status_code: 200
+      follow_redirects: none
+  
+  - name: ping VPN server
+   #shell: "ping -c 5 10.8.0.1 | grep '0 received' | wc -l"
+    shell: "ping -c 5 10.8.0.1 | grep 'received'"
+    register: ping_result 
+#    changed_when: False
+#    failed_when: ping_result.stdout == "1"
+#    failed_when: ping_result.rc != 1 
+#    failed_when: ping_result.stdout != ""
+    changed_when: ping_result.rc == 0
+    check_mode: no
+
+#  - command: echo "no conn:x  "
+#    when: ping_result.rc != 0
+
+#    net_ping:
+#      source: loopback0
+#      dest: 10.8.0.1
+#      vrf: tun0
+
+  - name: OpenVPN restart
+    become: yes
+    service: 
+      name: openvpn
+      state: restarted
+    when: ping_result.rc == 0
+    register: openvpn_restarted
+    
+
+#  - name: OpenVPN status
+#    shell: "systemctl status openvpn"
+#    changed_when: True
+#    register: result
+#  - command: "OpenVPN not running"
+#    when: result.rc!=0
+
+
+#  - name: Test
+#    shell:
+#      cmd: ls 
+#    register: result
+   
+#  - name: Google nslookup check
+#    shell: 
+#      cmd: nslookup google.com
+#    register: result
+#      executable:   
+      
+      
+      
+
+  - name: Debug
+    debug:
+      var: ping_result, openvpn_restarted.state   #shell: which bash
+ 
