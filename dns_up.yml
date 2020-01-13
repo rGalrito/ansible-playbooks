@@ -1,5 +1,5 @@
 - name: 
-  hosts: dns
+  hosts: raspberrypi
   #any_errors_fatal: true
   any_errors_fatal: false
   serial: 1
