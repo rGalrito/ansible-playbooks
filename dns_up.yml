@@ -46,6 +46,7 @@
       name: openvpn
       state: restarted
     when: ping_result.rc == 0
+    changed_when: ping_result.rc == 0
     register: openvpn_restarted
     
 
