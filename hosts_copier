@@ -1,0 +1,7 @@
+---
+- hosts: dns,mm
+  tasks:
+  - name: copy hosts file to remote host
+    copy:
+      src: files/hosts
+      dest: /etc/ansible/hosts
