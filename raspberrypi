@@ -19,12 +19,19 @@
 
   - debug:
       var: dns_check
+    when: '"200" in dns_check'
+
+  - name:
+    shell: "pihole status"
+    register: pihole_check
+
+  - debug:
+      var: pihole_check
+    when: '"NOT" in dns_check'
 
   - name: Reload dns
     shell: "pihole restartdns"
-    when: dns_check.status != 200
-    
-    
+    when: '"NOT" in pihole_check.stdout'
 
 
   ## VPN 
@@ -37,6 +44,7 @@
 
   - debug:
       var: ping_result
+    when: ping_result.rc == 1
 
   - name: OpenVPN restart
     become: yes
@@ -49,11 +57,17 @@
     
   - debug:
       var: openvpn_restarted
+    when: openvpn_restarted.skipped != true
 
   - name: Google nslookup check
     shell: 
       cmd: nslookup google.com 1.1.1.1
     register: result
+
+  - debug:
+      var: result
+    when: result.rc != 0
+
 
   - name: Debug
     debug:
