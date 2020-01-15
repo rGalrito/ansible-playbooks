@@ -21,15 +21,16 @@
       var: dns_check
     when: '"200" in dns_check'
 
-  - name:
+  - name: Get pihole service status
     shell: "pihole status"
     register: pihole_check
 
-  - debug:
+  - debug: 
+      name: "PIHOLE CHECK"
       var: pihole_check
     when: '"NOT" in dns_check'
 
-  - name: Reload dns
+  - name: PiHole restart
     shell: "pihole restartdns"
     when: '"NOT" in pihole_check.stdout'
 
@@ -40,7 +41,7 @@
     register: ping_result 
     changed_when: ping_result.rc == 1
     ignore_errors: yes
-    check_mode: no
+#    check_mode: no
 
   - debug:
       var: ping_result
@@ -57,7 +58,10 @@
     
   - debug:
       var: openvpn_restarted
-    when: openvpn_restarted.skipped != true
+    when: 
+      - openvpn_restarted.skipped is present
+      - openvpn_restarted.skipped 
+      - openvpn_restarted.skipped == "false"
 
   - name: Google nslookup check
     shell: 
@@ -69,7 +73,13 @@
     when: result.rc != 0
 
 
-  - name: Debug
+  - name: "Debug"
     debug:
-      var: ping_result, openvpn_restarted.state, result #shell: which bash
+      #var: ping_result|bool, openvpn_restarted.state|bool, result|bool #shell: which bash
+      var: ping_result|bool, openvpn_restarted|bool, result|bool #shell: which bash
+    #when: (ping_result or Empty not in ping_result.stderr) or 
+    #      (openvpn_restarted or not Empty in openvpn_restarted.stderr) or 
+    #      (result or Empty not in result.stderr)
+    #when: (ping_result.stderr or openvpn_restarted.stderr or result.stderr)  #shell: which bash
+
  
