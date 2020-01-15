@@ -1,5 +1,5 @@
 - name: 
-  hosts: localhost
+  hosts: dns
   vars:
     dns:
       admin_url: http://192.168.178.30/admin/
@@ -8,71 +8,54 @@
   serial: 1
   become: false
   tasks:
-#  - name: ping DNS server
-#    ping: 
-#  - name: ECHOING
-#    shell: >
-#      echo  {{ http.port }}
-#    register: echo
 
+  ## DNS
   - name: DNS admin page check
     uri:
       url: "{{ dns.admin_url }}"
       status_code: 200
       follow_redirects: none
-  
+    register: dns_check
+
+  - debug:
+      var: dns_check
+
+  - name: Reload dns
+    shell: "pihole restartdns"
+    when: dns_check.status != 200
+    
+    
+
+
+  ## VPN 
   - name: ping VPN server
-   #shell: "ping -c 5 10.8.0.1 | grep '0 received' | wc -l"
-    shell: "ping -c 5 10.8.0.1 | grep 'received'"
+    shell: "ping 10.8.0.1 -c 3"
     register: ping_result 
-#    changed_when: False
-#    failed_when: ping_result.stdout == "1"
-#    failed_when: ping_result.rc != 1 
-#    failed_when: ping_result.stdout != ""
-    changed_when: ping_result.rc == 0
+    changed_when: ping_result.rc == 1
+    ignore_errors: yes
     check_mode: no
 
-#  - command: echo "no conn:x  "
-#    when: ping_result.rc != 0
-
-#    net_ping:
-#      source: loopback0
-#      dest: 10.8.0.1
-#      vrf: tun0
+  - debug:
+      var: ping_result
 
   - name: OpenVPN restart
     become: yes
     service: 
       name: openvpn
       state: restarted
-    when: ping_result.rc == 0
-    changed_when: ping_result.rc == 0
+    when: ping_result.rc == 1
+    #changed_when: ping_result.rc == 0
     register: openvpn_restarted
     
+  - debug:
+      var: openvpn_restarted
 
-#  - name: OpenVPN status
-#    shell: "systemctl status openvpn"
-#    changed_when: True
-#    register: result
-#  - command: "OpenVPN not running"
-#    when: result.rc!=0
-
-
-#  - name: Test
-#    shell:
-#      cmd: ls 
-#    register: result
-   
-#  - name: Google nslookup check
-#    shell: 
-#      cmd: nslookup google.com
-#    register: result
-#      executable:   
-      
-      
-      
+  - name: Google nslookup check
+    shell: 
+      cmd: nslookup google.com 1.1.1.1
+    register: result
 
   - name: Debug
     debug:
-      var: ping_result, openvpn_restarted.state   #shell: which bash
+      var: ping_result, openvpn_restarted.state, result #shell: which bash
  
