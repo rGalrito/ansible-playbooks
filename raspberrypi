@@ -18,8 +18,8 @@
     register: dns_check
 
   - debug:
-      var: dns_check
-    when: '"200" in dns_check'
+      msg: dns_check|from_json
+    #when: '"200" in dns_check'
 
   - name: Get pihole service status
     shell: "pihole status"
@@ -59,9 +59,9 @@
   - debug:
       var: openvpn_restarted
     when: 
-      - openvpn_restarted.skipped is present
+#      - openvpn_restarted is not None
       - openvpn_restarted.skipped 
-      - openvpn_restarted.skipped == "false"
+#      - openvpn_restarted.skipped == "false"
 
   - name: Google nslookup check
     shell: 
