@@ -1,7 +1,14 @@
 ---
 - hosts: dns,mm
   tasks:
-  - name: copy hosts file to remote host
+  - name: copy hosts file to remote host # make sure that if no ansible exists, another method is used. Force path to exist on /etc/ansible/hosts ?
     copy:
       src: files/hosts
       dest: /etc/ansible/hosts
+      force: no
+    register: hostsfile
+
+
+
+  - debug:
+      var: hostsfile
