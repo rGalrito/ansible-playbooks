@@ -1,0 +1,22 @@
+- name: system updates
+  hosts: dns, mm, vpn_vpn
+  any_errors_fatal: false
+  become: false
+  #strategy: free
+  debugger: on_failed
+  gather_facts: false
+  tasks:
+
+  - name:
+    become: yes
+    apt:
+      update_cache: yes
+      upgrade: safe
+      autoclean: yes
+      autoremove: yes
+      state: latest
+    register: updates
+
+  - debug:
+      var: updates
+    when: updates.failed == true    
