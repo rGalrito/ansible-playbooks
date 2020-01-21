@@ -35,28 +35,29 @@
     when: '"NOT" in pihole_check.stdout'
 
 
-#  ## VPN 
-#  - name: ping VPN server
-#    shell: "ping 10.8.0.1 -c 3"
-#    register: ping_result 
-#    changed_when: ping_result.rc == 1
-#    ignore_errors: yes
-##    check_mode: no
-#
-#  - debug:
-#      var: ping_result
-#    when: ping_result.rc == 1
-#
-#  - name: OpenVPN restart
-#    become: yes
-#    service: 
-#      name: openvpn
-#      state: restarted
-#    when: ping_result.rc == 1
-#    #changed_when: ping_result.rc == 0
-#    register: openvpn_restarted
-#    
-#  - debug:
+  ## VPN 
+  - name: ping VPN server
+    shell: "ping 10.8.0.1 -c 3"
+    register: ping_result 
+    changed_when: ping_result.rc == 1
+    ignore_errors: yes
+#    check_mode: no
+
+  - debug:
+      var: ping_result
+    when: ping_result.rc == 1
+
+  - name: OpenVPN restart
+    become: yes
+    service: 
+      name: openvpn
+      state: restarted
+    when: ping_result.rc == 1
+    #changed_when: ping_result.rc == 0
+    register: openvpn_restarted
+    
+  - debug:
+      var: ping_result.rc
 #      var: openvpn_restarted
 #    when: 
 #      - openvpn_restarted is not None
@@ -73,8 +74,9 @@
     when: result.rc != 0
 
 
-  - name: "Debug"
-    debug:
-      var: ping_result|bool, openvpn_restarted|bool, result|bool #shell: which bash
+#  - name: "Debug"
+#    debug:
+#      var: ping_result
+#      var: ping_result, openvpn_restarted, result #shell: which bash
 
  

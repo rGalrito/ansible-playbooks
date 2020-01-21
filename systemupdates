@@ -3,8 +3,8 @@
   any_errors_fatal: false
   become: false
   #strategy: free
-  debugger: on_failed
-  gather_facts: false
+  #debugger: on_failed
+  gather_facts: true
   tasks:
 
   - name:
@@ -13,10 +13,9 @@
       update_cache: yes
       upgrade: safe
       autoclean: yes
-      autoremove: yes
       state: latest
     register: updates
 
   - debug:
-      var: updates
+      var: updates.stdout_lines
     when: updates.failed == true    
