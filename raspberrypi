@@ -57,7 +57,7 @@
     register: openvpn_restarted
     
   - debug:
-      var: ping_result.rc
+      var: ping_result.rc, openvpn_restarted.state
 #      var: openvpn_restarted
 #    when: 
 #      - openvpn_restarted is not None
@@ -68,6 +68,40 @@
     shell: 
       cmd: nslookup google.com 1.1.1.1
     register: result
+
+  - name: Mount up device by UUID
+    become: yes
+    mount:
+      path: /home/pi/externalhdd
+      src: UUID=5552f338-b563-4aa6-9174-8880db134b8b
+      fstype: ext4
+      #opts: noatime
+      state: present
+    register: hdd_mounted
+
+  - name: Run mount sda1 command
+    become: yes
+    ignore_errors: yes
+    shell:
+      cmd: mount /dev/sda1 /home/pi/externalhdd
+    register: sda1_mount
+
+  - name: Run mount sdb1 command
+    become: yes
+    ignore_errors: yes
+    shell:
+      cmd: mount /dev/sdb1 /home/pi/externalhdd
+    register: sdb1_mount
+
+
+  - debug:
+     var: hdd_mounted
+
+  - debug:
+     var: sda1_mount
+
+  - debug:
+     var: sdb1_mount
 
   - debug:
       var: result
