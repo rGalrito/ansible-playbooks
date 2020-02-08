@@ -82,16 +82,23 @@
   - name: Run mount sda1 command
     become: yes
     ignore_errors: yes
-    shell:
-      cmd: mount /dev/sda1 /home/pi/externalhdd
+    mount:
+      path: /home/pi/externalhdd
+      src: /dev/sda1
+      fstype: ext4
+      state: present
     register: sda1_mount
 
   - name: Run mount sdb1 command
     become: yes
     ignore_errors: yes
-    shell:
-      cmd: mount /dev/sdb1 /home/pi/externalhdd
+    mount:
+      path: /home/pi/externalhdd
+      src: /dev/sdb1
+      fstype: ext4
+      state: present
     register: sdb1_mount
+    when: sda1_mount.failed == true
 
 
   - debug:
