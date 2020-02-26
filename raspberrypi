@@ -87,7 +87,7 @@
       path: /home/pi/externalhdd
       src: /dev/sda1
       fstype: ext4
-      state: present
+      state: mounted
     register: sda1_mount
 
   - name: Run mount sdb1 command
@@ -97,9 +97,9 @@
       path: /home/pi/externalhdd
       src: /dev/sdb1
       fstype: ext4
-      state: present
+      state: mounted
     register: sdb1_mount
-    when: sda1_mount.failed == false
+#    when: sda1_mount.failed == false
 
 
   - debug:
