@@ -1,0 +1,43 @@
+- name: 
+  hosts: toillettenpi
+  vars:
+    dns:
+      admin_url: http://192.168.178.30/admin/
+  #any_errors_fatal: true
+  any_errors_fatal: false
+  serial: 1
+  become: false
+  tasks:
+
+  ## VPN 
+  - name: ping VPN server
+    shell: "ping 10.8.0.1 -c 3"
+    register: ping_result 
+    changed_when: ping_result.rc == 1
+    ignore_errors: yes
+#    check_mode: no
+
+  - debug:
+      var: ping_result
+    when: ping_result.rc == 1
+
+  - name: OpenVPN restart
+    become: yes
+    service: 
+      name: openvpn
+      state: restarted
+    when: ping_result.rc == 1
+    #changed_when: ping_result.rc == 0
+    register: openvpn_restarted
+    
+  - debug:
+      var: ping_result.rc, openvpn_restarted.state
+
+  - name: Google nslookup check
+    shell: 
+      cmd: nslookup google.com 1.1.1.1
+    register: result
+
+  - debug:
+      var: result
+    when: result.rc != 0
