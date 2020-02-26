@@ -78,6 +78,7 @@
       #opts: noatime
       state: present
     register: hdd_mounted
+    when: 1 == 2 
 
   - name: Run mount sda1 command
     become: yes
@@ -98,7 +99,7 @@
       fstype: ext4
       state: present
     register: sdb1_mount
-    when: sda1_mount.failed == true
+    when: sda1_mount.failed == false
 
 
   - debug:
