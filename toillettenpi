@@ -1,5 +1,5 @@
 - name: 
-  hosts: toillettenpi
+  hosts: mm
   vars:
     dns:
       admin_url: http://192.168.178.30/admin/
@@ -33,6 +33,13 @@
   - debug:
       var: ping_result.rc, openvpn_restarted.state
 
+  - name: nslookup deps
+    become: yes
+    apt:
+      name: dnsutils
+      state: present
+
+
   - name: Google nslookup check
     shell: 
       cmd: nslookup google.com 1.1.1.1
@@ -41,3 +48,23 @@
   - debug:
       var: result
     when: result.rc != 0
+
+
+   # monit
+  - name: "status pm2"
+    shell:
+      cmd: pm2 status | grep MagicMirror | grep enabled
+    register: pm2status
+    ignore_errors: yes
+    failed_when:  "'FAILED' in pm2status.stderr"
+   
+  - name: restart pm2
+    shell:
+      cmd: pm2 restart 0
+    when: "'FAILED' in pm2status.stderr"
+    register: pm2status
+    
+
+  - debug:
+      var: pm2status
+    #when: "'FAILED' in pm2status.stderr"
