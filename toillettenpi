@@ -3,40 +3,35 @@
   vars:
     dns:
       admin_url: http://192.168.178.30/admin/
-  #any_errors_fatal: true
   any_errors_fatal: false
   serial: 1
   become: false
   tasks:
 
-  - name: test
-    command: pwd
-    changed_when: true
-    notify: restart mm
-
   ## VPN 
   - name: ping VPN server
-    shell: "ping 10.8.0.1 -c 3"
+    shell: "ping 10.8.0.1 -c 3 -W 8"
     register: ping_result 
+    #failed_when: ping_result.stdout == 1
     changed_when: ping_result.rc == 1
     ignore_errors: yes
-#    check_mode: no
+
+  - name: restart vpn
+    command: pwd
+    changed_when: ping_result.rc == 1
+    notify: restart vpn
 
   - debug:
       var: ping_result
-    when: ping_result.rc == 1
+    #when: ping_result.rc == 1
 
-  - name: OpenVPN restart
-    become: yes
-    service: 
-      name: openvpn
-      state: restarted
-    when: ping_result.rc == 1
-    #changed_when: ping_result.rc == 0
-    register: openvpn_restarted
+#    when: ping_result.rc == 1
+#    notify: restart mm
+#    register: openvpn_restarted
     
   - debug:
-      var: ping_result.rc, openvpn_restarted.state
+      var: ping_result.rc
+#      var: ping_result.rc, openvpn_restarted.state
 
   - name: nslookup deps
     become: yes
@@ -55,20 +50,18 @@
     when: result.rc != 0
 
 
-   # monit
+  # restart MagicMirror
   - name: "status pm2"
     shell:
       cmd: pm2 status | grep MagicMirror | grep enabled
     register: pm2status
     ignore_errors: yes
-    failed_when:  "'FAILED' in pm2status.stderr"
+    changed_when:  "'FAILED' in pm2status.stderr"
    
-  - name: restart pm2
-    shell:
-      cmd: pm2 restart 0
-    when: "'FAILED' in pm2status.stderr"
-    register: pm2status
-    
+  - name: restart pm2 check
+    command: pwd
+    when: pm2status.rc == 1
+    notify: restart mm
 
   - debug:
       var: pm2status
@@ -78,4 +71,11 @@
     - name: restart mm
       listen: "restart mm"
       command: pm2 restart 0    
-
+      
+    - name: restart vpn
+      listen: "restart vpn"
+      become: yes
+      service: 
+        name: openvpn
+        state: restarted
+      when: ping_result.rc == 1
