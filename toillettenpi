@@ -9,6 +9,11 @@
   become: false
   tasks:
 
+  - name: test
+    command: pwd
+    changed_when: true
+    notify: restart mm
+
   ## VPN 
   - name: ping VPN server
     shell: "ping 10.8.0.1 -c 3"
@@ -68,3 +73,9 @@
   - debug:
       var: pm2status
     #when: "'FAILED' in pm2status.stderr"
+
+  handlers:
+    - name: restart mm
+      listen: "restart mm"
+      command: pm2 restart 0    
+
