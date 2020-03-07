@@ -1,3 +1,4 @@
+#!/usr/bin/ansible-playbook 
 - name: system updates
   hosts: dns, mm, vpn_vpn
   any_errors_fatal: false

@@ -1,3 +1,4 @@
+#!/usr/bin/ansible-playbook 
 - name: 
   hosts: dns
   vars:
