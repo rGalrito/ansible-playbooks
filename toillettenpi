@@ -44,6 +44,7 @@
   - name: Google nslookup check
     shell: 
       cmd: nslookup google.com 1.1.1.1
+    ignore_errors: yes
     register: result
 
   - debug:
