@@ -17,3 +17,14 @@
       var: mounted_disks
     when: 1 == 2
 
+
+  ## Mount pi disks in home folder
+  - name: mount mm in home folder
+    command: ../mountmm.sh
+    ignore_errors: yes
+    register: mounted_mm
+
+  - debug: 
+      var: mounted_mm
+    when: 1 == 2
+
