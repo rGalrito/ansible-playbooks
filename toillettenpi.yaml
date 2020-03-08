@@ -1,5 +1,5 @@
 #!/usr/bin/ansible-playbook
-- name: 
+- name:
   hosts: mm
   vars:
     dns:
@@ -11,8 +11,8 @@
 
   ## VPN 
   - name: ping VPN server
-    shell: "ping 10.8.0.1 -c 3 -W 8"
-    register: ping_result 
+    command: "ping 10.8.0.1 -c 3 -W 8"
+    register: ping_result
     #failed_when: ping_result.stdout == 1
     changed_when: ping_result.rc == 1
     ignore_errors: yes
@@ -29,7 +29,7 @@
 #    when: ping_result.rc == 1
 #    notify: restart mm
 #    register: openvpn_restarted
-    
+
   - debug:
       var: ping_result.rc
 #      var: ping_result.rc, openvpn_restarted.state
@@ -42,10 +42,10 @@
 
 
   - name: Google nslookup check
-    shell: 
-      cmd: nslookup google.com 1.1.1.1
+    command: nslookup google.com 1.1.1.1
     ignore_errors: yes
     register: result
+    changed_when: result.rc == 0
 
   - debug:
       var: result
@@ -59,7 +59,7 @@
     register: pm2status
     ignore_errors: yes
     changed_when:  "'FAILED' in pm2status.stderr"
-   
+
   - name: restart pm2 check
     command: pwd
     when: pm2status.rc == 1
@@ -72,12 +72,12 @@
   handlers:
     - name: restart mm
       listen: "restart mm"
-      command: pm2 restart 0    
-      
+      command: pm2 restart 0
+
     - name: restart vpn
       listen: "restart vpn"
       become: yes
-      service: 
+      service:
         name: openvpn
         state: restarted
       when: ping_result.rc == 1
