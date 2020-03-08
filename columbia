@@ -1,0 +1,19 @@
+#!/usr/bin/ansible-playbook 
+- name: 
+  hosts: columbia
+  vars:
+  any_errors_fatal: false
+  serial: 1
+  become: false
+  tasks:
+
+  ## Mount pi disks in home folder
+  - name: mount pi disks in home folder
+    command: ../mount.sh
+    ignore_errors: yes
+    register: mounted_disks
+
+  - debug: 
+      var: mounted_disks
+    when: 1 == 2
+
