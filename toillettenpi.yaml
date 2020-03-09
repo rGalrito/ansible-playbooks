@@ -57,6 +57,7 @@
     shell:
       cmd: pm2 status | grep MagicMirror | grep enabled
     register: pm2status
+    remote_user: pi
     ignore_errors: yes
     changed_when:  "'FAILED' in pm2status.stderr"
 
