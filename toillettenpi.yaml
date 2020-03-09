@@ -73,7 +73,8 @@
   handlers:
     - name: restart mm
       listen: "restart mm"
-      command: sudo -u pi pm2 restart 0
+      become_user: pi
+      command: pm2 restart 0
 
     - name: restart vpn
       listen: "restart vpn"
