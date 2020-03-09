@@ -72,6 +72,7 @@
 
   handlers:
     - name: restart mm
+      become: yes
       listen: "restart mm"
       command: sudo -u pi pm2 restart 0
 
