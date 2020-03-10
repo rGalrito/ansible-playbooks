@@ -1,12 +1,10 @@
 #!/usr/bin/env ansible-playbook
 - name:
   hosts: mm
-  vars:
-    dns:
-      admin_url: http://192.168.178.30/admin/
-  any_errors_fatal: false
-  serial: 1
+  #any_errors_fatal: false
+  #serial: 1
   become: false
+  ignore_errors: yes
   tasks:
 
   ## VPN 
@@ -14,25 +12,21 @@
     command: "ping 10.8.0.1 -c 3 -W 8"
     register: ping_result
     #failed_when: ping_result.stdout == 1
-    changed_when: ping_result.rc == 1
-    ignore_errors: yes
+    changed_when: ping_result.rc != 0
+    
 
   - name: restart vpn
     command: pwd
-    changed_when: ping_result.rc == 1
+    changed_when: ping_result.rc != 0
     notify: restart vpn
 
   - debug:
       var: ping_result
-    #when: ping_result.rc == 1
-
-#    when: ping_result.rc == 1
-#    notify: restart mm
-#    register: openvpn_restarted
+    when: ping_result.rc != 0
 
   - debug:
       var: ping_result.rc
-#      var: ping_result.rc, openvpn_restarted.state
+    when: False
 
   - name: nslookup deps
     become: yes
@@ -45,7 +39,7 @@
     command: nslookup google.com 1.1.1.1
     ignore_errors: yes
     register: result
-    changed_when: result.rc == 0
+    changed_when: result.rc != 0
 
   - debug:
       var: result
@@ -54,33 +48,36 @@
 
   # restart MagicMirror
   - name: "status pm2"
+    become_user: pi
     shell:
-      cmd: sudo -u pi pm2 status | grep MagicMirror | grep enabled
+#      cmd: sudo -u pi pm2 status mm
+      cmd: pm2 status mm
     register: pm2status
-    ignore_errors: yes
-    changed_when:  "'FAILED' in pm2status.stderr"
-
-  - name: restart pm2 check
-    command: pwd
-    when: pm2status.rc == 1
-    notify: restart mm
+    #ignore_errors: yes
+    changed_when:  "'online' not in pm2status.stdout and 'enabled' not in pm2status.stdout"
 
   - debug:
       var: pm2status
-    #when: "'FAILED' in pm2status.stderr"
+    when: "'online' not in pm2status.stdout and 'enabled' not in pm2status.stdout"
 
+  - name: restart mm
+    become_user: pi
+#      listen: "restart mm"
+    command: pm2 restart mm
+    when: "'online' not in pm2status.stdout and 'enabled' not in pm2status.stdout"
+    register: pm2restart
+
+  - debug:
+      var: pm2restart
+    when: "'online' not in pm2status.stdout and 'enabled' not in pm2status.stdout"
+  
+  # this handler can be removed and added sequentially as a task. I will just leave it like this for now
   handlers:
-    - name: restart mm
-      listen: "restart mm"
-      command: sudo -u pi pm2 restart 0
-      register: test
-
-    - debug:
-        var: test
-
     - name: restart vpn
-      listen: "restart vpn"
+#      listen: "restart vpn"
       become: yes
       service:
         name: openvpn
         state: restarted
+      register: vpn_out
+
