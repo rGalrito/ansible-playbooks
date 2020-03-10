@@ -54,9 +54,8 @@
 
   # restart MagicMirror
   - name: "status pm2"
-    remote_user: pi
     shell:
-      cmd: pm2 status | grep MagicMirror | grep enabled
+      cmd: sudo -u pi pm2 status | grep MagicMirror | grep enabled
     register: pm2status
     ignore_errors: yes
     changed_when:  "'FAILED' in pm2status.stderr"
@@ -74,6 +73,10 @@
     - name: restart mm
       listen: "restart mm"
       command: sudo -u pi pm2 restart 0
+      register: test
+
+    - debug:
+        var: test
 
     - name: restart vpn
       listen: "restart vpn"
