@@ -48,10 +48,10 @@
 
   # restart MagicMirror
   - name: "status pm2"
-    become_user: pi
+#    become_user: pi
     shell:
-#      cmd: sudo -u pi pm2 status mm
-      cmd: pm2 status mm
+      cmd: sudo -u pi pm2 status mm
+#      cmd: pm2 status mm
     register: pm2status
     #ignore_errors: yes
     changed_when:  "'online' not in pm2status.stdout and 'enabled' not in pm2status.stdout"
@@ -62,7 +62,6 @@
 
   - name: restart mm
     become_user: pi
-#      listen: "restart mm"
     command: pm2 restart mm
     when: "'online' not in pm2status.stdout and 'enabled' not in pm2status.stdout"
     register: pm2restart
