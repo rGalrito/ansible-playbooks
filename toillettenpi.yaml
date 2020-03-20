@@ -61,8 +61,8 @@
     when: "'online' not in pm2status.stdout and 'enabled' not in pm2status.stdout"
 
   - name: restart mm
-    become_user: pi
-    command: pm2 restart mm
+#    become_user: pi
+    command: sudo -u pi pm2 restart mm
     when: "'online' not in pm2status.stdout and 'enabled' not in pm2status.stdout"
     register: pm2restart
 
